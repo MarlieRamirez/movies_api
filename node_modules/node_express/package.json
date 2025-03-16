@@ -1,0 +1,15 @@
+{
+  "name": "node_express",
+  "version": "0.0.1",
+  "description": "this project is used to learn node express",
+  "main": "app.js",
+  "dependencies": {
+    "express": "^4.15.3"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "make test"
+  },
+  "author": "",
+  "license": "ISC"
+}
