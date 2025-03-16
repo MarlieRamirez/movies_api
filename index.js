@@ -170,7 +170,7 @@ app.put('/cinema/:id', async (req, res) => {
     const token = req.header("Authorization")?.split(" ")[1];
     const decoded = validar_JWT(token, res);
 
-    const id = req.params.id; 
+    const id =  parseInt(req.params.id); 
     const reservations = 0;
 
     if (decoded.role == 'admin') {
@@ -188,22 +188,24 @@ app.put('/cinema/:id', async (req, res) => {
         if (reservations == 0) {
             try {
                 var sql = "Update cinema set cinema.rows = ?, cinema.columns=? where id=?"
-                const id = parseInt(req.params.id);
 
-                await connection.query(sql, [req.body.rows, req.body.columns, id]).then(([rows]) => {
-                    console.log(rows)
-                    // return res.status(200).send("Todo bien"); 
-                })
-
+                if(req.body.rows !=null || req.body.columns !=null){
+                    await connection.query(sql, [req.body.rows, req.body.columns, id]).then(([rows]) => {
+                        console.log(rows)
+                        // return res.status(200).send("Todo bien"); 
+                    })
+                }else{
+                    return res.status(400).json({ "message": "Bad request" })
+                }
             } catch (error) {
                 console.log(error)
                 return res.status(400)
 
             }
-            return res.json('update')
+            return res.status(200).json({"message": "Se ha modificado la capacidad"});
         }
 
-        return res.json({ "Message": "Y" })
+        return res.json({ "message": "Hay reservaciones proximas, no se puede modificar" })
     }
     else {
         return res.status(401).json({ "Go back": "You're not allowed to be here" })
@@ -260,9 +262,11 @@ app.get('/seats', (req, res) => {
     var sql = "SELECT * FROM movie_theather.seats WHERE id_schedule = ?"
 
     try {
-        connection.query(sql, [req.body.id]).then(([rows]) => {
-            return res.status(200).json(rows)
-        })
+        if (req.body.id != null) {
+            connection.query(sql, [req.body.id]).then(([rows]) => {
+                return res.status(200).json(rows)
+            })    
+        }
     } catch (err) {
         res.status(400)
         return console.log(err)
@@ -279,9 +283,12 @@ app.post('/seats', (req, res) => {
         const sql = 'INSERT INTO movie_theather.seats (full_name, seats.columns, seats.rows, id_user, id_schedule) VALUES (?,?,?,?,?)'
 
         try {
-            connection.query(sql, [req.body.full_name, req.body.columns, req.body.rows, decoded.user, req.body.id_schedule]).then(() => {
-                return res.json({ "200": "Succesfull insert" })
-            })
+            if (req.body.full_name != null || req.body.columns!= null || req.body.rows!= null || req.body.id_schedule) {
+                connection.query(sql, [req.body.full_name, req.body.columns, req.body.rows, decoded.id, req.body.id_schedule]).then(() => {
+                    return res.status(200).json({"message": "Reservación completada"});
+                })
+            }
+            
         } catch (err) {
             return console.log(err)
         }
@@ -302,7 +309,7 @@ app.delete('/user/:id', (req, res) => {
         var sql = "UPDATE user set estado='inactive' where id = ?"
 
         connection.query(sql, [id]).then(([rows]) => {
-            return res.status(200).json("User dehabilitated")
+            return res.status(200).json({"message": "Usuario desactivado"});
         })
 
     } else {
@@ -343,7 +350,7 @@ app.post('/movies', (req, res) => {
         var sql = "INSERT INTO movies (`name`,`sinopsis`,`length`,`genre`,`year`,`img`) VALUES (?,?,?,?,?,?)"
         try {
             connection.query(sql, [req.body.name, req.body.sinopsis, req.body.length, req.body.genre, req.body.year, req.body.img]).then(([rows]) => {
-                return res.status(200).json(rows.insertId)
+                return res.status(200).json({"message": "Crear una nueva pelicula"});
             })
         } catch (err) {
             res.status(400).json(err)
@@ -368,8 +375,7 @@ app.get('/movies/:id', (req, res) => {
         var sql = "Select * from movies where id=?"
         try {
             connection.query(sql, [req.params.id]).then(([rows]) => {
-                res.status(200);
-                res.json(rows)
+                return res.status(200).json(rows);
             })
         } catch (err) {
             res.status(400)
