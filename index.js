@@ -1,8 +1,8 @@
-import express from 'express';
+import express, { json } from 'express';
 import jwt from 'jsonwebtoken';
 import { new_token, checked } from './encrypt/token.js'
 import { connection } from './connect.js'
-import { getLast, newSchedule, reserved } from './sql/extra_queries.js'
+import {  newSchedule, reserved } from './sql/extra_queries.js'
 import * as dotenv from 'dotenv'
 import dateFormat from "dateformat";
 
@@ -70,21 +70,16 @@ app.post('/cinema', async (req, res) => {
 
         if (req.body.name != null || req.body.rows != null, req.body.columns != null || req.body.movie != null || req.body.img != null) {
             try {
-                connection.query(sql, [req.body.name, req.body.rows, req.body.columns, req.body.movie, req.body.img]).then(async ()=>{
-                    const id = await getLast();
-                    
-                    for (let i; i < 9; i++) {
-                        console.log("a")
-                        const now = new Date;
-                        const valid = newSchedule(now, id);
-                        //new schedule
-                        now = now.addDays(1);
+                connection.query(sql, [req.body.name, req.body.rows, req.body.columns, req.body.movie, req.body.img]).then(async ([result]) => {
+                    const id = result['insertId'];
+                    var now = new Date();
 
-                        if (!valid) {
-                            throw Error
-                        }
+                    for (var i = 0; i < 9; i++) {
+                        newSchedule(now, id);
+                        now = now.addDays(1);
                     }
-                })        
+
+                })
                 return res.status(200).json({ "message": "Sala y funciones creadas" })
 
             } catch (err) {
@@ -197,6 +192,19 @@ app.put('/cinema/:id', async (req, res) => {
 })
 
 //6. Cartelera siguientes 8 dias
+app.get('/dates', (req, res) => {
+    var now = new Date();
+    const list = []
+    for (var i = 0; i < 9; i++) {
+        
+        list.push(now);
+        now = now.addDays(1);
+    }
+    console.log(JSON.parse(JSON.stringify({"dates": list})));
+    return res.status(200).json({"dates": list})
+})
+//FE mostrar card con {del 'dia_inicio' hasta el 'dia_final'}
+//BE recolecta todos dentro de 8 dias a futuro
 app.get('/schedule', (req, res) => {
     const token = req.header("Authorization")?.split(" ")[1];
     const decoded = validar_JWT(token, res);
@@ -300,79 +308,6 @@ app.delete('/user/:id', (req, res) => {
     }
 })
 //9. LOGOUT desde BE solo necesita el timing
-
-//mostrar peliculas
-app.get('/movies', (req, res) => {
-    const token = req.header("Authorization")?.split(" ")[1];
-    const decoded = validar_JWT(token, res);
-
-    if (decoded.role == undefined) {
-        res.status(401)
-        res.json({ "Go back": "You're not allowed to be here" })
-        return
-    }
-
-    var sql = "Select * from movies"
-    try {
-        connection.query(sql).then(([rows]) => {
-            res.status(200);
-            res.json(rows)
-        })
-    } catch (err) {
-        res.status(400)
-        return console.log(err)
-    }
-})
-
-//Admin registrar una pelicula
-app.post('/movies', (req, res) => {
-    const token = req.header("Authorization")?.split(" ")[1];
-    const decoded = validar_JWT(token, res);
-
-    if (decoded.role == 'admin') {
-        var sql = "INSERT INTO movies (`name`,`sinopsis`,`length`,`genre`,`year`,`img`) VALUES (?,?,?,?,?,?)"
-        try {
-            connection.query(sql, [req.body.name, req.body.sinopsis, req.body.length, req.body.genre, req.body.year, req.body.img]).then(([rows]) => {
-                return res.status(200).json({ "message": "Crear una nueva pelicula" });
-            })
-        } catch (err) {
-            res.status(400).json(err)
-            return console.log(err)
-        }
-    }
-    else {
-
-        return res.status(401).json({ "Go back": "You're not allowed to be here" })
-
-    }
-
-
-})
-
-//Obtener datos de una pelicula
-app.get('/movies/:id', (req, res) => {
-    const token = req.header("Authorization")?.split(" ")[1];
-    const decoded = validar_JWT(token, res);
-
-    if (decoded.role == 'admin') {
-        var sql = "Select * from movies where id=?"
-        try {
-            connection.query(sql, [req.params.id]).then(([rows]) => {
-                return res.status(200).json(rows);
-            })
-        } catch (err) {
-            res.status(400)
-            return console.log(err)
-        }
-    }
-    else {
-        res.status(401)
-        res.json({ "Go back": "You're not allowed to be here" })
-        return
-    }
-})
-
-
 
 app.listen(3000, () => {
     console.log("Servidor corriendo en 3000")

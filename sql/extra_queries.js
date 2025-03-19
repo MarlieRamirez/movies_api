@@ -18,19 +18,9 @@ export const reserved = (id) => {
     return reservations
 }
 
-export const getLast = () => {
-    const sql = "SELECT id from cinema ORDER BY id DESC LIMIT 1"
-
-    const last = connection.query(sql).then(([response])=>{
-        return response[0]['id'];
-    })
-    return last
-}
-
 export const newSchedule = (date, id)=>{
     const sql = "INSERT INTO movie_theather.schedule ( date, time, id_cinema) VALUES (?,'10:00 am',?)"
-    console.log("fase")
-    connection.query(sql, [date, id]),then(()=>{
+    connection.query(sql, [date, id]).then(()=>{
         return true
     });
     return false
