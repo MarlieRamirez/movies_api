@@ -2,7 +2,7 @@ import express from 'express';
 import jwt from 'jsonwebtoken';
 import { new_token, checked } from './encrypt/token.js'
 import { connection } from './connect.js'
-import { reserved } from './sql/extra_queries.js'
+import { getLast, newSchedule, reserved } from './sql/extra_queries.js'
 import * as dotenv from 'dotenv'
 import dateFormat from "dateformat";
 
@@ -61,49 +61,32 @@ app.post('/user', (req, res) => {
 })
 
 //3. NUEVOS HORARIOS
-
-//3. Crear horario de sala de cine
-app.post('/schedule', (req, res) => {
+app.post('/cinema', async (req, res) => {
     const token = req.header("Authorization")?.split(" ")[1];
     const decoded = validar_JWT(token, res);
 
     if (decoded.role == 'admin') {
-        if (req.body.id_movie != null || req.body.date != null || req.body.id_cinema != null || typeof req.body.id_movie != 'number' || typeof req.body.id_cinema != 'number') {
-            const sql = "INSERT INTO movie_theather.schedule ( id_movie, date, time, id_cinema) VALUES (?,?,'10:00 am',?)"
+        let sql = 'INSERT INTO movie_theather.cinema (name, cinema.rows, cinema.columns, movie, img) VALUES (?,?,?,?,?)'
 
+        if (req.body.name != null || req.body.rows != null, req.body.columns != null || req.body.movie != null || req.body.img != null) {
             try {
-                connection.query(sql, [req.body.id_movie, req.body.date, req.body.id_cinema]).then(() => {
-                    return res.status(200).json({ "message": "Se ha creado el horario" })
-                })
-            } catch (err) {
-                return console.log(err)
-            }
-        } else {
-            return res.status(400).json({ "message": "Bad request" })
-        }
+                connection.query(sql, [req.body.name, req.body.rows, req.body.columns, req.body.movie, req.body.img]).then(async ()=>{
+                    const id = await getLast();
+                    
+                    for (let i; i < 9; i++) {
+                        console.log("a")
+                        const now = new Date;
+                        const valid = newSchedule(now, id);
+                        //new schedule
+                        now = now.addDays(1);
 
-    } else {
-        res.status(401)
-        res.json({ "Go back": "You're not allowed to be here" })
-        return
-    }
+                        if (!valid) {
+                            throw Error
+                        }
+                    }
+                })        
+                return res.status(200).json({ "message": "Sala y funciones creadas" })
 
-
-})
-
-//3. Crear nueva sala
-app.post('/cinema', (req, res) => {
-    const token = req.header("Authorization")?.split(" ")[1];
-    const decoded = validar_JWT(token, res);
-
-    if (decoded.role == 'admin') {
-        const sql = 'INSERT INTO movie_theather.cinema (name, cinema.rows, cinema.columns) VALUES (?,?,?)'
-
-        if (req.body.name != null || req.body.rows != null, req.body.columns != null || typeof req.body.columns != 'number' || typeof req.body.rows != 'number') {
-            try {
-                connection.query(sql, [req.body.name, req.body.rows, req.body.columns]).then(() => {
-                    return res.status(200).json({ "message": "Sala creada" })
-                })
             } catch (err) {
                 return console.log(err)
             }
@@ -117,7 +100,35 @@ app.post('/cinema', (req, res) => {
     }
 })
 
-//obtener sala
+//4. Admin Modificar datos de una pelicula
+app.put('/movies/:id', (req, res) => {
+    const token = req.header("Authorization")?.split(" ")[1];
+    const decoded = validar_JWT(token, res);
+
+    if (decoded.role == 'admin') {
+        var sql = "UPDATE cinema SET `movie`=? ,`img`=? WHERE id=?"
+
+        try {
+            const id = parseInt(req.params.id);
+            if (req.body.movie != null || req.body.img != null || id != null) {
+                connection.query(sql, [req.body.movie, req.body.img, id]).then(([rows]) => {
+                    return res.status(200).json({ "message": "Película modificada de la sala" });
+                })
+            } else {
+                return res.status(400).json({ "message": "Bad request" })
+            }
+
+        } catch (err) {
+            res.status(400)
+            return console.log(err)
+        }
+    }
+    else {
+        return res.status(401).json({ "Go back": "You're not allowed to be here" })
+    }
+})
+
+//obtener salas
 app.get('/cinema', (req, res) => {
     const token = req.header("Authorization")?.split(" ")[1];
     const decoded = validar_JWT(token, res);
@@ -137,47 +148,19 @@ app.get('/cinema', (req, res) => {
     }
 });
 
-//4. Admin Modificar datos de una pelicula
-app.put('/movies/:id', (req, res) => {
-    const token = req.header("Authorization")?.split(" ")[1];
-    const decoded = validar_JWT(token, res);
-
-    if (decoded.role == 'admin') {
-        var sql = "UPDATE movies SET `name`=? ,`sinopsis`=?,`length`=?,`genre`=?,`year`=?,`img`=? WHERE id=?"
-
-        try {
-            const id = parseInt(req.params.id);
-            if (req.body.name!= null ||  req.body.length!= null ||  req.body.year!= null ||  req.body.img!= null ||  id!= null) {
-                connection.query(sql, [req.body.name, req.body.length, req.body.year, req.body.img, req.params.id]).then(([rows]) => {
-                    return res.status(200).json({"message": "Película modificada"});
-                })
-            }else{
-                return res.status(400).json({ "message": "Bad request" })
-            }
-            
-        } catch (err) {
-            res.status(400)
-            return console.log(err)
-        }
-    }
-    else {
-        return res.status(401).json({ "Go back": "You're not allowed to be here" })
-    }
-})
-
 //5. Modificar capacidad de una sala
 app.put('/cinema/:id', async (req, res) => {
     const token = req.header("Authorization")?.split(" ")[1];
     const decoded = validar_JWT(token, res);
 
-    const id =  parseInt(req.params.id); 
+    const id = parseInt(req.params.id);
     const reservations = 0;
 
     if (decoded.role == 'admin') {
 
-        if(typeof id == 'number'){
+        if (typeof id == 'number') {
             reservations = await reserved(id)
-        }else{
+        } else {
             return res.status(400).json({ "message": "Bad request" })
         }
 
@@ -189,12 +172,12 @@ app.put('/cinema/:id', async (req, res) => {
             try {
                 var sql = "Update cinema set cinema.rows = ?, cinema.columns=? where id=?"
 
-                if(req.body.rows !=null || req.body.columns !=null){
+                if (req.body.rows != null || req.body.columns != null) {
                     await connection.query(sql, [req.body.rows, req.body.columns, id]).then(([rows]) => {
                         console.log(rows)
                         // return res.status(200).send("Todo bien"); 
                     })
-                }else{
+                } else {
                     return res.status(400).json({ "message": "Bad request" })
                 }
             } catch (error) {
@@ -202,7 +185,7 @@ app.put('/cinema/:id', async (req, res) => {
                 return res.status(400)
 
             }
-            return res.status(200).json({"message": "Se ha modificado la capacidad"});
+            return res.status(200).json({ "message": "Se ha modificado la capacidad" });
         }
 
         return res.json({ "message": "Hay reservaciones proximas, no se puede modificar" })
@@ -265,7 +248,7 @@ app.get('/seats', (req, res) => {
         if (req.body.id != null) {
             connection.query(sql, [req.body.id]).then(([rows]) => {
                 return res.status(200).json(rows)
-            })    
+            })
         }
     } catch (err) {
         res.status(400)
@@ -283,12 +266,12 @@ app.post('/seats', (req, res) => {
         const sql = 'INSERT INTO movie_theather.seats (full_name, seats.columns, seats.rows, id_user, id_schedule) VALUES (?,?,?,?,?)'
 
         try {
-            if (req.body.full_name != null || req.body.columns!= null || req.body.rows!= null || req.body.id_schedule) {
+            if (req.body.full_name != null || req.body.columns != null || req.body.rows != null || req.body.id_schedule) {
                 connection.query(sql, [req.body.full_name, req.body.columns, req.body.rows, decoded.id, req.body.id_schedule]).then(() => {
-                    return res.status(200).json({"message": "Reservación completada"});
+                    return res.status(200).json({ "message": "Reservación completada" });
                 })
             }
-            
+
         } catch (err) {
             return console.log(err)
         }
@@ -309,7 +292,7 @@ app.delete('/user/:id', (req, res) => {
         var sql = "UPDATE user set estado='inactive' where id = ?"
 
         connection.query(sql, [id]).then(([rows]) => {
-            return res.status(200).json({"message": "Usuario desactivado"});
+            return res.status(200).json({ "message": "Usuario desactivado" });
         })
 
     } else {
@@ -350,7 +333,7 @@ app.post('/movies', (req, res) => {
         var sql = "INSERT INTO movies (`name`,`sinopsis`,`length`,`genre`,`year`,`img`) VALUES (?,?,?,?,?,?)"
         try {
             connection.query(sql, [req.body.name, req.body.sinopsis, req.body.length, req.body.genre, req.body.year, req.body.img]).then(([rows]) => {
-                return res.status(200).json({"message": "Crear una nueva pelicula"});
+                return res.status(200).json({ "message": "Crear una nueva pelicula" });
             })
         } catch (err) {
             res.status(400).json(err)
