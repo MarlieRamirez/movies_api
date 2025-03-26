@@ -1,4 +1,4 @@
-import { connection } from '../connect.js'
+import { connection } from '../config/connect.js'
 import dateFormat from "dateformat";
 
 export const reserved = (id) => {
