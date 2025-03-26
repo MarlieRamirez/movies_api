@@ -7,12 +7,42 @@ import * as dotenv from 'dotenv'
 import validar_JWT from '../config/validate.js';
 import dateFormat from "dateformat";
 
+
 dotenv.config();
 const router = express.Router();
 const secret = process.env.ACCESS_TOKEN_SECRET;
 
-
-//1. LOGIN
+/**
+ * @swagger
+ * /login:
+ *      post:
+ *          summary: Realizar login y obtener clave de autorización
+ *          parameters: 
+ *              - in: body
+ *                name: user_name
+ *                schema:
+ *                  type: string
+ *                required: true
+ * 
+ *              - in: body
+ *                name: pwd
+ *                schema:
+ *                  type: string
+ *                required: true
+ *          responses: 
+ *              404:
+ *                  description: Usuario no encontrado           
+ *              200:
+ *                  description: Lista de usuarios
+ *                  content:
+ *                      application/json:
+ *                          schema: 
+ *                              type: array
+    *                              properties: 
+    *                                  accessToken: 
+    *                                      type: string
+    *                                      example: dsuayibyyjkkdyaldai652a#32ea
+ */
 router.post('/login', (req, res) => {
     const sql = "Select * from user where user_name = ? AND estado ='active'";
 

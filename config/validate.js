@@ -1,3 +1,8 @@
+import jwt from 'jsonwebtoken';
+import * as dotenv from 'dotenv'
+dotenv.config();
+
+const secret = process.env.ACCESS_TOKEN_SECRET;
 
 function validar_JWT(token, res) {
     if (!token) return res.status(401).json({ error: "Acceso Denegado" });

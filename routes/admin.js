@@ -2,6 +2,7 @@ import express from 'express';
 import { connection } from '../config/connect.js'
 import validar_JWT from '../config/validate.js';
 import { newSchedule, reserved } from '../sql/extra_queries.js'
+import swaggerJSDoc from 'swagger-jsdoc';
 
 const router = express.Router();
 

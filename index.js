@@ -176,3 +176,27 @@ function validar_JWT(token, res) {
 function now() {
     return dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss")
 }
+
+//swagger
+import swaggerJSDoc from 'swagger-jsdoc';
+import swaggerUi from 'swagger-ui-express';
+
+const swaggerOptions = {
+    swaggerDefinition: {
+        myapi: '3.0.0',
+        info: {
+            title: 'MySQL2 Example',
+            version: '1.0.0',
+            description: 'API documentation',
+        },
+        servers: [
+            {
+                url: 'http://localhost:3001',
+            },
+        ],
+    },
+    apis: ['./*.js','./routes/*.js'],
+};
+// Swagger setup
+const swaggerDocs = swaggerJSDoc(swaggerOptions);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
