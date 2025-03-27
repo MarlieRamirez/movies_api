@@ -142,7 +142,7 @@ paths:
           description: OK
         "401":
           description: Acceso denegado
-  /admin/movie/{id}:
+  /admin/movies/{id}:
     put:
       parameters:
         - in: path
@@ -153,7 +153,7 @@ paths:
 
       security:
         - JWT: []
-      summary: Modificar la capacidad de una sala
+      summary: Modificar la información de una pelicula
       tags:
         - Cinema - Admin
       requestBody:
@@ -195,6 +195,94 @@ paths:
           description: OK
         "401":
           description: Acceso denegado
+  
+  /cinema:
+    get:
+      summary: Obtener todas las salas a futuro
+      tags:
+        - Cinema
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+  /schedule:
+    get: 
+      summary: Obtener todas las funciones de una sala
+      tags:
+        - Cinema
+      parameters:
+        - in: query
+          name: id
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+  /seats:
+    get:
+      parameters:
+        - in: query
+          name: id
+          schema:
+            type: string
+          required: true
+
+      security:
+        - JWT: []
+      summary: Obtener la disponibilidad de una funcion
+      tags:
+        - Cinema
+      
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad request
+        "401":
+          description: Acceso denegado
+    post:
+      security:
+        - JWT: [] 
+      
+      summary: Relaizar reserva
+      tags:
+        - Cinema
+      requestBody:
+        description: Cuerpo de request de reserva
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                full_name:
+                  type: string
+                column:
+                  type: integer
+                rows:
+                  type: integer
+                id_user:
+                  type: integer
+                id_schedule:
+                  type: integer
+              required:
+                - name
+                - rows
+                - columns
+                - id_user
+                - id_schedule
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Acceso denegado 
+        "400":
+          description: Bad request
+  
 components:
   securitySchemes:
     JWT:

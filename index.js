@@ -18,10 +18,3 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.listen(3001, () => {
     console.log("Servidor corriendo en 3001")
 })
-
-//Operations
-Date.prototype.addDays = function (days) {
-    var date = new Date(this.valueOf());
-    date.setDate(date.getDate() + days);
-    return date;
-}

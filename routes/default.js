@@ -1,19 +1,12 @@
 import express from 'express';
-import validar_JWT from '../config/validate';
-import { connection } from '../config/connect';
+import validar_JWT from '../config/validate.js';
+import { connection } from '../config/connect.js';
 import dateFormat from "dateformat";
 
 const router = express.Router();
 
 //obtener salas que todavia no han vencido
 router.get('/cinema', (req, res) => {
-    const token = req.header("Authorization")?.split(" ")[1];
-    const decoded = validar_JWT(token, res);
-
-    if (decoded.role == undefined) {
-        return res.status(401).json({ "Go back": "You're not allowed to be here" })
-    }
-
     var sql = "Select * from cinema WHERE final_date >= ?"
     try {
         connection.query(sql, [now()]).then(([rows]) => {
@@ -26,26 +19,18 @@ router.get('/cinema', (req, res) => {
 });
 
 router.get('/schedule', (req, res) => {
-    const token = req.header("Authorization")?.split(" ")[1];
-    const decoded = validar_JWT(token, res);
-
-    if (decoded.role == undefined) {
-        res.status(401)
-        res.json({ "Go back": "You're not allowed to be here" })
-        return
-    }
-    var sql = "SELECT * FROM movie_theather.schedule WHERE date >= ? AND cinema_id = ?"
+    const sql = "SELECT * FROM movie_theather.schedule WHERE date >= ? AND id_cinema = ?"
 
     const unformatted = new Date();
 
     const today = dateFormat(unformatted, "yyyy-mm-dd");
 
     try {
-        if(req.body.id == null){
+        if(req.query.id == null){
             return res.status(400).json({ "message": "Bad request" })
         }
         
-        connection.query(sql, [today, after]).then(([rows]) => {
+        connection.query(sql, [today, parseInt(req.query.id)]).then(([rows]) => {
             return res.status(200).json(rows)
         })
     } catch (err) {
@@ -66,7 +51,7 @@ router.get('/seats', (req, res) => {
 
     try {
         if (req.body.id != null) {
-            connection.query(sql, [req.body.id]).then(([rows]) => {
+            connection.query(sql, [parseInt(req.query.id)]).then(([rows]) => {
                 return res.status(200).json(rows)
             })
         }else{
@@ -80,7 +65,7 @@ router.get('/seats', (req, res) => {
 
 // 7. POST SEATS
 // full name se genera desde FE 
-app.post('/seats', (req, res) => {
+router.post('/seats', (req, res) => {
     const token = req.header("Authorization")?.split(" ")[1];
     const decoded = validar_JWT(token, res);
 
@@ -88,7 +73,7 @@ app.post('/seats', (req, res) => {
         return res.status(401).json({ "Go back": "You're not allowed to be here" })
     }
 
-    const sql = 'INSERT INTO movie_theather.seats (full_name, seats.columns, seats.rows, id_user, id_schedule) VALUES (?,?,?,?,?)'
+    const sql = 'INSERT INTO movie_theather.seats (full_name, seats.column, seats.row, id_user, id_schedule) VALUES (?,?,?,?,?)'
 
     try {
         if (req.body.full_name != null || req.body.columns != null || req.body.rows != null || req.body.id_schedule) {
