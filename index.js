@@ -178,25 +178,9 @@ function now() {
 }
 
 //swagger
-import swaggerJSDoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
+import YAML from 'yamljs';
 
-const swaggerOptions = {
-    swaggerDefinition: {
-        myapi: '3.0.0',
-        info: {
-            title: 'MySQL2 Example',
-            version: '1.0.0',
-            description: 'API documentation',
-        },
-        servers: [
-            {
-                url: 'http://localhost:3001',
-            },
-        ],
-    },
-    apis: ['./*.js','./routes/*.js'],
-};
 // Swagger setup
-const swaggerDocs = swaggerJSDoc(swaggerOptions);
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+const swaggerDocument = YAML.load('swagger.yml');
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));

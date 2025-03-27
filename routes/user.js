@@ -12,37 +12,6 @@ dotenv.config();
 const router = express.Router();
 const secret = process.env.ACCESS_TOKEN_SECRET;
 
-/**
- * @swagger
- * /login:
- *      post:
- *          summary: Realizar login y obtener clave de autorización
- *          parameters: 
- *              - in: body
- *                name: user_name
- *                schema:
- *                  type: string
- *                required: true
- * 
- *              - in: body
- *                name: pwd
- *                schema:
- *                  type: string
- *                required: true
- *          responses: 
- *              404:
- *                  description: Usuario no encontrado           
- *              200:
- *                  description: Lista de usuarios
- *                  content:
- *                      application/json:
- *                          schema: 
- *                              type: array
-    *                              properties: 
-    *                                  accessToken: 
-    *                                      type: string
-    *                                      example: dsuayibyyjkkdyaldai652a#32ea
- */
 router.post('/login', (req, res) => {
     const sql = "Select * from user where user_name = ? AND estado ='active'";
 
@@ -69,14 +38,12 @@ router.post('/login', (req, res) => {
 
 });
 
-//info del user
 router.get('/', (req, res) => {
     const token = req.header("Authorization")?.split(" ")[1];
     const decoded = validar_JWT(token, res);
     res.json(decoded)
 })
 
-//2.NUEVA CUENTA Cliente o guest
 router.post('/new', (req, res) => {
     const generated_token = new_token(req.body.pwd);
 

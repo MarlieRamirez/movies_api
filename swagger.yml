@@ -1,0 +1,70 @@
+openapi: "3.0.3"
+info:
+  title: Movie Theather Web Development Project
+  version: "1.0"
+servers:
+  - url: http://localhost:3001/
+paths:
+  /user/login:
+    post:
+      summary: Realizar login y obtener clave de autorización
+      tags:
+        - User
+      requestBody:
+        description: Required
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_name:
+                  type: string
+                pwd:
+                  type: string
+              required:
+                - user_name
+                - pwd
+      responses:
+        "200":
+          description: OK
+        "404":
+          description: Usuario no encontrado
+  /user:
+    get:
+      summary: Obtener usuario decodificado
+      tags:
+        - User
+      security:
+        - JWT: []
+      
+      responses:
+        "200":
+          description: OK
+        "404":
+          description: Usuario no encontrado
+  /user/new:
+    post:
+      tags:
+        - User
+      summary: Crear una cuenta de cliente
+      requestBody:
+        description: Atributos de un cliente
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_name:
+                  type: string
+                email:
+                  type: string
+                pwd:
+                  type: string
+              required:
+                - user_name
+                - pwd
+      responses:
+        "200":
+          description: OK

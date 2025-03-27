@@ -17,6 +17,7 @@
     "mysql2": "^3.12.0",
     "node_express": "^0.0.1",
     "swagger-jsdoc": "^6.2.8",
-    "swagger-ui-express": "^5.0.1"
+    "swagger-ui-express": "^5.0.1",
+    "yamljs": "^0.3.0"
   }
 }
