@@ -4,11 +4,11 @@ import adminRoutes from "./routes/admin.js"
 import defaultRoutes from "./routes/default.js"
 import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
-
+import cors from  'cors';
 
 const app = express()
 const swaggerDocument = YAML.load('swagger.yml');
-
+app.use(cors())
 app.use(express.json())
 app.use('/user', userRoutes);
 app.use('/admin', adminRoutes);
