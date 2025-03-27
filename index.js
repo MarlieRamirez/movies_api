@@ -5,15 +5,19 @@ import * as dotenv from 'dotenv'
 import dateFormat from "dateformat";
 import userRoutes from "./routes/user.js"
 import adminRoutes from "./routes/admin.js"
+import swaggerUi from 'swagger-ui-express';
+import YAML from 'yamljs';
+
 
 dotenv.config();
 const app = express()
 const secret = process.env.ACCESS_TOKEN_SECRET;
+const swaggerDocument = YAML.load('swagger.yml');
 
 app.use(express.json())
 app.use('/user', userRoutes);
 app.use('/admin', adminRoutes);
-
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 //UNDEFINED PURPOSE
 //obtener salas guest
@@ -178,9 +182,5 @@ function now() {
 }
 
 //swagger
-import swaggerUi from 'swagger-ui-express';
-import YAML from 'yamljs';
 
 // Swagger setup
-const swaggerDocument = YAML.load('swagger.yml');
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));

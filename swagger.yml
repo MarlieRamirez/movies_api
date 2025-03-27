@@ -20,8 +20,10 @@ paths:
               properties:
                 user_name:
                   type: string
+                  example: admin
                 pwd:
                   type: string
+                  example: '123'
               required:
                 - user_name
                 - pwd
@@ -36,7 +38,7 @@ paths:
       tags:
         - User
       security:
-        - JWT: []
+        - JWT: [eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OSwidXNlcl9uYW1lIjoiYWRtaW4iLCJlbWFpbCI6Im1hcmxpZXJhbWlyZXphQGdtYWlsLmNvbSIsInRva2VuIjoiJDJiJDEwJE5aWnNxc1ZPSlA2Zzh5Q0hqM1BmNC5ZQW5mdElUNHFWeUpEd29IaEhKRW8vNDljekpoY25tIiwiY3JlYXRlZF9hdCI6IjIwMjUtMDMtMTVUMDY6MDA6MDAuMDAwWiIsInJvbGUiOiJhZG1pbiIsImVzdGFkbyI6ImFjdGl2ZSIsImlhdCI6MTc0MzA0MzUxNX0.kuxHJzRxR3q8Q8TZ_r4tg-8GJv23HG7WIvCtY_rpYsA]
       
       responses:
         "200":
@@ -68,3 +70,135 @@ paths:
       responses:
         "200":
           description: OK
+  
+  /admin/cinema:
+    post:
+      security:
+        - JWT: [] 
+      
+      summary: Crear los cines y horarios para la pelicula
+      tags:
+        - Cinema - Admin
+      requestBody:
+        description: Cuerpo de request de cinemas
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                rows:
+                  type: number
+                columns:
+                  type: number
+                movie:
+                  type: string
+                img:
+                  type: string
+              required:
+                - name
+                - rows
+                - columns
+                - movie
+                - img
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Acceso denegado      
+  /admin/cinema/{id}:
+    put:
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+
+      security:
+        - JWT: []
+      summary: Modificar la capacidad de una sala
+      tags:
+        - Cinema - Admin
+      requestBody:
+        description: Cuerpo de request de cinemas
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                rows:
+                  type: number
+                columns:
+                  type: number
+              required:
+                - rows
+                - columns
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Acceso denegado
+  /admin/movie/{id}:
+    put:
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+
+      security:
+        - JWT: []
+      summary: Modificar la capacidad de una sala
+      tags:
+        - Cinema - Admin
+      requestBody:
+        description: Cuerpo de request de cinemas
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                movie:
+                  type: string
+                img:
+                  type: string
+              required:
+                - movie
+                - img
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Acceso denegado      
+  /admin/user/{id}:
+    delete:
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+
+      security:
+        - JWT: []
+      summary: Dar de baja a un usuario
+      tags:
+        - User
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Acceso denegado
+components:
+  securitySchemes:
+    JWT:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      #eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OSwidXNlcl9uYW1lIjoiYWRtaW4iLCJlbWFpbCI6Im1hcmxpZXJhbWlyZXphQGdtYWlsLmNvbSIsInRva2VuIjoiJDJiJDEwJE5aWnNxc1ZPSlA2Zzh5Q0hqM1BmNC5ZQW5mdElUNHFWeUpEd29IaEhKRW8vNDljekpoY25tIiwiY3JlYXRlZF9hdCI6IjIwMjUtMDMtMTVUMDY6MDA6MDAuMDAwWiIsInJvbGUiOiJhZG1pbiIsImVzdGFkbyI6ImFjdGl2ZSIsImlhdCI6MTc0MzA0MzUxNX0.kuxHJzRxR3q8Q8TZ_r4tg-8GJv23HG7WIvCtY_rpYsA

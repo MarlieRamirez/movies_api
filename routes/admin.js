@@ -2,7 +2,7 @@ import express from 'express';
 import { connection } from '../config/connect.js'
 import validar_JWT from '../config/validate.js';
 import { newSchedule, reserved } from '../sql/extra_queries.js'
-import swaggerJSDoc from 'swagger-jsdoc';
+import dateFormat from "dateformat";
 
 const router = express.Router();
 
@@ -16,10 +16,10 @@ router.post('/cinema', async (req, res) => {
 
         if (req.body.name != null || req.body.rows != null, req.body.columns != null || req.body.movie != null || req.body.img != null) {
             try {
-                first = now();
-                connection.query(sql, [req.body.name, req.body.rows, req.body.columns, req.body.movie, req.body.img, first, first.addDays(8) ]).then(async ([result]) => {
+                var now = new Date();
+                connection.query(sql, [req.body.name, req.body.rows, req.body.columns, req.body.movie, req.body.img, dateFormat(now, "yyyy-mm-dd"), dateFormat(now.addDays(8), "yyyy-mm-dd") ]).then(async ([result]) => {
                     const id = result['insertId'];
-                    var now = new Date();
+                    
 
                     for (var i = 0; i < 9; i++) {
                         newSchedule(now, id);
@@ -47,7 +47,7 @@ router.put('/cinema/:id', async (req, res) => {
     const decoded = validar_JWT(token, res);
 
     const id = parseInt(req.params.id);
-    const reservations = 0;
+    var reservations = 0;
 
     if (decoded.role == 'admin') {
 
@@ -141,4 +141,7 @@ Date.prototype.addDays = function (days) {
     return date;
 }
 
+function now() {
+    return dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss")
+}
 export default router;

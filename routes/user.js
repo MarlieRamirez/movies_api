@@ -24,7 +24,7 @@ router.post('/login', (req, res) => {
 
             const user = rows[0]
             if (checked(req.body.pwd, user.token)) {
-                const accessToken = jwt.sign(user, secret, { expiresIn: '15min' })
+                const accessToken = jwt.sign(user, secret)
                 res.json({ accessToken: accessToken })
 
             } else {
