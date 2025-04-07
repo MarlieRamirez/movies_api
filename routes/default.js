@@ -18,6 +18,19 @@ router.get('/cinema', (req, res) => {
     }
 });
 
+router.get('/cinema/:id', (req, res) => {
+  var sql = "Select * from cinema WHERE id >= ?"
+  try {
+      connection.query(sql, [req.params.id]).then(([rows]) => {
+          return res.status(200).json(rows[0])
+      })
+  } catch (err) {
+      res.status(400)
+      return console.log(err)
+  }
+});
+
+
 router.get('/schedule', (req, res) => {
     const sql = "SELECT * FROM movie_theather.schedule WHERE date >= ? AND id_cinema = ?"
 
@@ -41,16 +54,10 @@ router.get('/schedule', (req, res) => {
 
 // 7. GET SEATS
 router.get('/seats', (req, res) => {
-    const token = req.header("Authorization")?.split(" ")[1];
-    const decoded = validar_JWT(token, res);
-
-    if (decoded.role == undefined) {
-        return res.status(401).json({ "Go back": "You're not allowed to be here" })
-    }
     var sql = "SELECT * FROM movie_theather.seats WHERE id_schedule = ?"
 
     try {
-        if (req.body.id != null) {
+        if (req.query.id != null) {
             connection.query(sql, [parseInt(req.query.id)]).then(([rows]) => {
                 return res.status(200).json(rows)
             })
@@ -76,8 +83,8 @@ router.post('/seats', (req, res) => {
     const sql = 'INSERT INTO movie_theather.seats (full_name, seats.column, seats.row, id_user, id_schedule) VALUES (?,?,?,?,?)'
 
     try {
-        if (req.body.full_name != null || req.body.columns != null || req.body.rows != null || req.body.id_schedule) {
-            connection.query(sql, [req.body.full_name, req.body.columns, req.body.rows, decoded.id, req.body.id_schedule]).then(() => {
+        if (req.body.full_name != null || req.body.column != null || req.body.rows != null || req.body.id_schedule) {
+            connection.query(sql, [req.body.full_name, req.body.column, req.body.rows, decoded.id, req.body.id_schedule]).then(() => {
                 return res.status(200).json({ "message": "Reservación completada" });
             })
         }
@@ -108,7 +115,7 @@ Date.prototype.addDays = function (days) {
 }
 
 function now() {
-    return dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss")
+    return dateFormat(new Date(), "yyyy-mm-dd")
 }
 //LOGOUT DESDE FE
 export default router;
