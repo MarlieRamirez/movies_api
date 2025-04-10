@@ -52,11 +52,18 @@ router.post('/new', (req, res) => {
     try {
         connection.query(sql, [req.body.user_name, req.body.email, generated_token, now()]).then(() => {
             return res.status(200).json({ "message": "Usuario creado" })
+        }).catch((error)=>{
+          if(error.errno	=='1062'){
+            return res.status(500).json({"message": "Base de datos"})  
+          }
+          return error
         })
     } catch (err) {
+        res.status(400).json({ "message": err.code })
         return console.log(err)
     }
 })
+
 function now() {
     return dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss")
 }
