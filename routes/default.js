@@ -94,6 +94,27 @@ router.post('/seats', (req, res) => {
     }
 })
 
+// Obtener todas las reservaciones del usuario
+router.get('/reservations', (req, res) => {
+  const token = req.header("Authorization")?.split(" ")[1];
+  const decoded = validar_JWT(token, res);
+
+  if (decoded.role == undefined) {
+      return res.status(401).json({ "Go back": "You're not allowed to be here" })
+  }
+
+  const sql = 'SELECT * FROM seats WHERE id_user = ?'
+  
+  try {
+    connection.query(sql, [decoded.id]).then(([rows]) => {
+      return res.status(200).json(rows);
+    })
+  } catch (err) {
+      return console.log(err)
+  }
+});
+
+
 // Solo genera las siguientes 8 fechas (puede ser inutil)
 router.get('/dates', (req, res) => {
     var now = new Date();
