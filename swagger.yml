@@ -75,6 +75,17 @@ paths:
           description: OK
 
   /admin/cinema:
+    get:
+      security:
+        - JWT: []
+      summary: Obtener todas las salas que han existido
+      tags:
+        - Cinema - Admmin
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
     post:
       security:
         - JWT: []
@@ -112,6 +123,24 @@ paths:
         "401":
           description: Acceso denegado
   /admin/cinema/{id}:
+    delete:
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+
+      security:
+        - JWT: []
+      summary: Eliminar todo registro de una sala
+      tags:
+        - Cinema - Admin
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Acceso denegado
     put:
       parameters:
         - in: path

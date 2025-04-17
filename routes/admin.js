@@ -151,6 +151,76 @@ router.get('/users', (req, res) => {
   }
 })
 
+//Mostrar todas las salas al administrador
+router.get('/cinema', (req, res) => {
+  const token = req.header("Authorization")?.split(" ")[1];
+  const decoded = validar_JWT(token, res);
+  if (decoded.role == 'admin') {
+    var sql = "Select * from cinema"
+    try {
+      connection.query(sql).then(([rows]) => {
+        return res.status(200).json(rows)
+      })
+    } catch (err) {
+      res.status(400)
+      return console.log(err)
+    }
+  }
+});
+
+//Eliminar sala y funciones si no hay guardado
+router.delete('/cinema/:id', (req, res) => {
+  const token = req.header("Authorization")?.split(" ")[1];
+  const decoded = validar_JWT(token, res);
+  var del = false;
+  var sql = '';
+
+  try {
+    const id = parseInt(req.params.id);
+
+    if (decoded.role == 'admin') {
+      //get all ids 
+      sql = "Select Count(seats.id) as 'Reserved' from seats INNER JOIN movie_theather.schedule ON movie_theather.schedule.id = seats.id_schedule INNER JOIN movie_theather.cinema ON movie_theather.cinema.id = movie_theather.schedule.id_cinema WHERE movie_theather.schedule.id_cinema=?"
+      
+      connection.query(sql, [id])
+      .then(([[rows]]) => {
+        console.log(rows.Reserved)
+
+        if(rows.Reserved == 0){
+          del = true
+        }
+      }).finally(()=>{
+        if(del){
+          sql = 'DELETE FROM schedule where id_cinema = ?'
+
+          connection.query(sql, [id]).then(([rows])=>{
+            console.log('DELETED SCHEDULES');
+          }).finally(()=>{
+            
+            sql = 'DELETE FROM cinema where id = ?'
+            connection.query(sql, [id]).then(([rows])=>{
+              console.log('DELETER FROM CINEMA')
+            }).finally(()=>{
+              return res.status(200).json({"message": "Todos los registros fueron eliminados"})
+            })
+
+          })
+          
+        }else{
+          return res.status(200).json({"message": "No se puede eliminar la sala, tiene registros en reservación"})
+        }        
+      })
+
+      
+    }
+  } catch (error) {
+    res.status(400)
+    return console.log(err)
+  }
+});
+
+
+
 Date.prototype.addDays = function (days) {
   var date = new Date(this.valueOf());
   date.setDate(date.getDate() + days);
