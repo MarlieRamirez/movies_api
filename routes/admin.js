@@ -11,7 +11,7 @@ router.post('/cinema', async (req, res) => {
   const token = req.header("Authorization")?.split(" ")[1];
   const decoded = validar_JWT(token, res);
 
-  if (decoded.role == 'admin') {
+  if (decoded && decoded.role == 'admin') {
     let sql = 'INSERT INTO movie_theather.cinema (name, cinema.rows, cinema.columns, movie, img, init_date, final_date) VALUES (?,?,?,?,?,?,?)'
 
     if (req.body.name != null || req.body.rows != null, req.body.columns != null || req.body.movie != null || req.body.img != null) {
@@ -49,7 +49,7 @@ router.put('/cinema/:id', async (req, res) => {
   const id = parseInt(req.params.id);
   var reservations = 0;
 
-  if (decoded.role == 'admin') {
+  if (decoded && decoded.role == 'admin') {
 
     if (typeof id == 'number') {
       reservations = await reserved(id)
@@ -94,7 +94,7 @@ router.put('/movies/:id', (req, res) => {
   const token = req.header("Authorization")?.split(" ")[1];
   const decoded = validar_JWT(token, res);
 
-  if (decoded.role == 'admin') {
+  if (decoded && decoded.role == 'admin') {
     var sql = "UPDATE cinema SET `movie`=? ,`img`=? WHERE id=?"
 
     try {
@@ -123,7 +123,7 @@ router.delete('/user/:id', (req, res) => {
   const token = req.header("Authorization")?.split(" ")[1];
   const decoded = validar_JWT(token, res);
 
-  if (decoded.role == 'admin') {
+  if (decoded && decoded.role == 'admin') {
     var sql = "UPDATE user set estado='inactive' where id = ?"
 
     connection.query(sql, [id]).then(([rows]) => {
@@ -139,7 +139,7 @@ router.get('/users', (req, res) => {
   const token = req.header("Authorization")?.split(" ")[1];
   const decoded = validar_JWT(token, res);
 
-  if (decoded.role == 'admin') {
+  if (decoded && decoded.role == 'admin') {
     var sql = "Select * from user WHERE estado = 'active'"
 
     connection.query(sql).then(([rows]) => {
@@ -155,7 +155,7 @@ router.get('/users', (req, res) => {
 router.get('/cinema', (req, res) => {
   const token = req.header("Authorization")?.split(" ")[1];
   const decoded = validar_JWT(token, res);
-  if (decoded.role == 'admin') {
+  if (decoded && decoded.role == 'admin') {
     var sql = "Select * from cinema"
     try {
       connection.query(sql).then(([rows]) => {
@@ -178,7 +178,7 @@ router.delete('/cinema/:id', (req, res) => {
   try {
     const id = parseInt(req.params.id);
 
-    if (decoded.role == 'admin') {
+    if (decoded && decoded.role == 'admin') {
       //get all ids 
       sql = "Select Count(seats.id) as 'Reserved' from seats INNER JOIN movie_theather.schedule ON movie_theather.schedule.id = seats.id_schedule INNER JOIN movie_theather.cinema ON movie_theather.cinema.id = movie_theather.schedule.id_cinema WHERE movie_theather.schedule.id_cinema=?"
       

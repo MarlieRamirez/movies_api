@@ -76,7 +76,7 @@ router.post('/seats', (req, res) => {
     const token = req.header("Authorization")?.split(" ")[1];
     const decoded = validar_JWT(token, res);
 
-    if (decoded.role == undefined) {
+    if (decoded && decoded.role == undefined) {
         return res.status(401).json({ "Go back": "You're not allowed to be here" })
     }
 
@@ -99,7 +99,7 @@ router.get('/reservations', (req, res) => {
   const token = req.header("Authorization")?.split(" ")[1];
   const decoded = validar_JWT(token, res);
 
-  if (decoded.role == undefined) {
+  if (decoded && decoded.role == undefined) {
       return res.status(401).json({ "Go back": "You're not allowed to be here" })
   }
 
