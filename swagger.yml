@@ -80,7 +80,7 @@ paths:
         - JWT: []
       summary: Obtener todas las salas que han existido
       tags:
-        - Cinema - Admmin
+        - Cinema - Admin
       responses:
         "200":
           description: OK
@@ -239,6 +239,21 @@ paths:
         "400":
           description: Bad Request
   /cinema/{id}:
+    get:
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      summary: Obtener datos de sala
+      tags:
+        - Cinema
+      responses:
+        "200":
+          description: OK
+  
+  /schedule/{id}:
     get:
       parameters:
         - in: path

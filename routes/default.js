@@ -7,7 +7,7 @@ const router = express.Router();
 
 //obtener salas que todavia no han vencido
 router.get('/cinema', (req, res) => {
-    var sql = "Select * from cinema WHERE final_date >= ?"
+    var sql = "Select * from cinema WHERE final_date > ?"
     try {
         connection.query(sql, [now()]).then(([rows]) => {
             return res.status(200).json(rows)
@@ -51,6 +51,18 @@ router.get('/schedule', (req, res) => {
         return console.log(err)
     }
 })
+
+router.get('/schedule/:id', (req, res) => {
+  var sql = "Select * from schedule WHERE id >= ?"
+  try {
+      connection.query(sql, [req.params.id]).then(([rows]) => {
+        return res.status(200).json(rows[0])
+      })
+  } catch (err) {
+      res.status(400)
+      return console.log(err)
+  }
+});
 
 // 7. GET SEATS
 router.get('/seats', (req, res) => {

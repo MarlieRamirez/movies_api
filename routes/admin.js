@@ -17,12 +17,12 @@ router.post('/cinema', async (req, res) => {
     if (req.body.name != null || req.body.rows != null, req.body.columns != null || req.body.movie != null || req.body.img != null) {
       try {
         var now = new Date();
-        connection.query(sql, [req.body.name, req.body.rows, req.body.columns, req.body.movie, req.body.img, dateFormat(now, "yyyy-mm-dd"), dateFormat(now.addDays(8), "yyyy-mm-dd")]).then(async ([result]) => {
+        connection.query(sql, [req.body.name, req.body.rows, req.body.columns, req.body.movie, req.body.img, dateFormat(now.addDays(1), "yyyy-mm-dd"), dateFormat(now.addDays(8), "yyyy-mm-dd")]).then(async ([result]) => {
           const id = result['insertId'];
 
 
           for (var i = 0; i < 9; i++) {
-            newSchedule(now, id);
+            newSchedule(now.addDays(1), id);
             now = now.addDays(1);
           }
 
@@ -156,7 +156,7 @@ router.get('/cinema', (req, res) => {
   const token = req.header("Authorization")?.split(" ")[1];
   const decoded = validar_JWT(token, res);
   if (decoded && decoded.role == 'admin') {
-    var sql = "Select * from cinema"
+    var sql = "Select * from cinema order by id DESC"
     try {
       connection.query(sql).then(([rows]) => {
         return res.status(200).json(rows)
