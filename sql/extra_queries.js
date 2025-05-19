@@ -1,9 +1,9 @@
-import { connection } from '../config/connect.js'
+import { connection, db } from '../config/connect.js'
 import dateFormat from "dateformat";
 
 export const reserved = (id) => {
 
-    const sql = "Select Count(seats.id) as 'Reserved' from seats INNER JOIN movie_theather.schedule ON movie_theather.schedule.id = seats.id_schedule INNER JOIN movie_theather.cinema ON movie_theather.cinema.id = movie_theather.schedule.id_cinema WHERE movie_theather.schedule.id_cinema=? AND movie_theather.schedule.date between ? AND ?"
+    const sql = "Select Count(seats.id) as 'Reserved' from seats INNER JOIN "+db+".schedule ON "+db+".schedule.id = seats.id_schedule INNER JOIN "+db+".cinema ON "+db+".cinema.id = "+db+".schedule.id_cinema WHERE "+db+".schedule.id_cinema=? AND "+db+".schedule.date between ? AND ?"
     const unformatted = new Date();
 
     const today = dateFormat(unformatted, "yyyy-mm-dd");
@@ -19,7 +19,7 @@ export const reserved = (id) => {
 }
 
 export const newSchedule = (date, id)=>{
-    const sql = "INSERT INTO movie_theather.schedule ( date, time, id_cinema) VALUES (?,'10:00 am',?)"
+    const sql = "INSERT INTO "+db+".schedule ( date, time, id_cinema) VALUES (?,'10:00 am',?)"
     connection.query(sql, [date, id]).then(()=>{
         return true
     });

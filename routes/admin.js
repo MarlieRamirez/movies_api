@@ -1,5 +1,5 @@
 import express from 'express';
-import { connection } from '../config/connect.js'
+import { connection, db } from '../config/connect.js'
 import validar_JWT from '../config/validate.js';
 import { newSchedule, reserved } from '../sql/extra_queries.js'
 import dateFormat from "dateformat";
@@ -12,7 +12,7 @@ router.post('/cinema', async (req, res) => {
   const decoded = validar_JWT(token, res);
 
   if (decoded && decoded.role == 'admin') {
-    let sql = 'INSERT INTO movie_theather.cinema (name, cinema.rows, cinema.columns, movie, img, init_date, final_date) VALUES (?,?,?,?,?,?,?)'
+    let sql = 'INSERT INTO '+db+'.cinema (name, cinema.rows, cinema.columns, movie, img, init_date, final_date) VALUES (?,?,?,?,?,?,?)'
 
     if (req.body.name != null || req.body.rows != null, req.body.columns != null || req.body.movie != null || req.body.img != null) {
       try {
@@ -180,7 +180,7 @@ router.delete('/cinema/:id', (req, res) => {
 
     if (decoded && decoded.role == 'admin') {
       //get all ids 
-      sql = "Select Count(seats.id) as 'Reserved' from seats INNER JOIN movie_theather.schedule ON movie_theather.schedule.id = seats.id_schedule INNER JOIN movie_theather.cinema ON movie_theather.cinema.id = movie_theather.schedule.id_cinema WHERE movie_theather.schedule.id_cinema=?"
+      sql = "Select Count(seats.id) as 'Reserved' from seats INNER JOIN "+db+".schedule ON "+db+".schedule.id = seats.id_schedule INNER JOIN "+db+".cinema ON "+db+".cinema.id = "+db+".schedule.id_cinema WHERE "+db+".schedule.id_cinema=?"
       
       connection.query(sql, [id])
       .then(([[rows]]) => {

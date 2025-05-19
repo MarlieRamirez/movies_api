@@ -1,6 +1,6 @@
 import express from 'express';
 import validar_JWT from '../config/validate.js';
-import { connection } from '../config/connect.js';
+import { connection, db } from '../config/connect.js';
 import dateFormat from "dateformat";
 
 const router = express.Router();
@@ -32,7 +32,7 @@ router.get('/cinema/:id', (req, res) => {
 
 
 router.get('/schedule', (req, res) => {
-    const sql = "SELECT * FROM movie_theather.schedule WHERE date >= ? AND id_cinema = ?"
+    const sql = "SELECT * FROM "+db+".schedule WHERE date >= ? AND id_cinema = ?"
 
     const unformatted = new Date();
 
@@ -66,7 +66,7 @@ router.get('/schedule/:id', (req, res) => {
 
 // 7. GET SEATS
 router.get('/seats', (req, res) => {
-    var sql = "SELECT * FROM movie_theather.seats WHERE id_schedule = ?"
+    var sql = "SELECT * FROM "+db+".seats WHERE id_schedule = ?"
 
     try {
         if (req.query.id != null) {
@@ -92,7 +92,7 @@ router.post('/seats', (req, res) => {
         return res.status(401).json({ "Go back": "You're not allowed to be here" })
     }
 
-    const sql = 'INSERT INTO movie_theather.seats (full_name, seats.column, seats.row, id_user, id_schedule) VALUES (?,?,?,?,?)'
+    const sql = 'INSERT INTO '+db+'.seats (full_name, seats.column, seats.row, id_user, id_schedule) VALUES (?,?,?,?,?)'
 
     try {
         if (req.body.full_name != null || req.body.column != null || req.body.rows != null || req.body.id_schedule) {
