@@ -8,7 +8,10 @@ import cors from  'cors';
 
 const app = express()
 const swaggerDocument = YAML.load('swagger.yml');
-app.use(cors())
+app.use(cors({
+  origin: ['https://movietheather-production.up.railway.app'],
+  methods: 'GET, POST, PUT, DELETE',
+}))
 app.use(express.json())
 app.use('/user', userRoutes);
 app.use('/admin', adminRoutes);
