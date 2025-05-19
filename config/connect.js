@@ -5,6 +5,6 @@ import mysql from 'mysql2/promise';
 export const connection = await mysql.createConnection({
   host: process.env.MYSQLHOST || 'localhost',
   user: process.env.MYSQLUSER || 'root',
-  password: process.env.MYSQLPORT || 'mysqlMarlie',
+  password: process.env.MYSQLPASSWORD || 'mysqlMarlie',
   database: process.env.MYSQLDATABASE || 'movie_theather'
 });
