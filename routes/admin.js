@@ -12,17 +12,18 @@ router.post('/cinema', async (req, res) => {
   const decoded = validar_JWT(token, res);
 
   if (decoded && decoded.role == 'admin') {
-    let sql = 'INSERT INTO '+db+'.cinema (name, cinema.rows, cinema.columns, movie, img, init_date, final_date) VALUES (?,?,?,?,?,?,?)'
+    let sql = 'INSERT INTO ' + db + '.cinema (name, cinema.rows, cinema.columns, movie, img, init_date, final_date) VALUES (?,?,?,?,?,?,?)'
 
     if (req.body.name != null || req.body.rows != null, req.body.columns != null || req.body.movie != null || req.body.img != null) {
       try {
         var now = new Date();
-        connection.query(sql, [req.body.name, req.body.rows, req.body.columns, req.body.movie, req.body.img, dateFormat(now.addDays(1), "yyyy-mm-dd"), dateFormat(now.addDays(8), "yyyy-mm-dd")]).then(async ([result]) => {
+        now = now.addDays(1)
+        connection.query(sql, [req.body.name, req.body.rows, req.body.columns, req.body.movie, req.body.img, dateFormat(now, "yyyy-mm-dd"), dateFormat(now.addDays(8), "yyyy-mm-dd")]).then(async ([result]) => {
           const id = result['insertId'];
 
-
+          
           for (var i = 0; i < 9; i++) {
-            newSchedule(now.addDays(1), id);
+            newSchedule(now, id);
             now = now.addDays(1);
           }
 
@@ -180,38 +181,38 @@ router.delete('/cinema/:id', (req, res) => {
 
     if (decoded && decoded.role == 'admin') {
       //get all ids 
-      sql = "Select Count(seats.id) as 'Reserved' from seats INNER JOIN "+db+".schedule ON "+db+".schedule.id = seats.id_schedule INNER JOIN "+db+".cinema ON "+db+".cinema.id = "+db+".schedule.id_cinema WHERE "+db+".schedule.id_cinema=?"
-      
+      sql = "Select Count(seats.id) as 'Reserved' from seats INNER JOIN " + db + ".schedule ON " + db + ".schedule.id = seats.id_schedule INNER JOIN " + db + ".cinema ON " + db + ".cinema.id = " + db + ".schedule.id_cinema WHERE " + db + ".schedule.id_cinema=?"
+
       connection.query(sql, [id])
-      .then(([[rows]]) => {
-        console.log(rows.Reserved)
+        .then(([[rows]]) => {
+          console.log(rows.Reserved)
 
-        if(rows.Reserved == 0){
-          del = true
-        }
-      }).finally(()=>{
-        if(del){
-          sql = 'DELETE FROM schedule where id_cinema = ?'
+          if (rows.Reserved == 0) {
+            del = true
+          }
+        }).finally(() => {
+          if (del) {
+            sql = 'DELETE FROM schedule where id_cinema = ?'
 
-          connection.query(sql, [id]).then(([rows])=>{
-            console.log('DELETED SCHEDULES');
-          }).finally(()=>{
-            
-            sql = 'DELETE FROM cinema where id = ?'
-            connection.query(sql, [id]).then(([rows])=>{
-              console.log('DELETER FROM CINEMA')
-            }).finally(()=>{
-              return res.status(200).json({"message": "Todos los registros fueron eliminados"})
+            connection.query(sql, [id]).then(([rows]) => {
+              console.log('DELETED SCHEDULES');
+            }).finally(() => {
+
+              sql = 'DELETE FROM cinema where id = ?'
+              connection.query(sql, [id]).then(([rows]) => {
+                console.log('DELETER FROM CINEMA')
+              }).finally(() => {
+                return res.status(200).json({ "message": "Todos los registros fueron eliminados" })
+              })
+
             })
 
-          })
-          
-        }else{
-          return res.status(200).json({"message": "No se puede eliminar la sala, tiene registros en reservación"})
-        }        
-      })
+          } else {
+            return res.status(200).json({ "message": "No se puede eliminar la sala, tiene registros en reservación" })
+          }
+        })
 
-      
+
     }
   } catch (error) {
     res.status(400)

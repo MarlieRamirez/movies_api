@@ -3,7 +3,7 @@ info:
   title: Movie Theather Web Development Project
   version: "1.0"
 servers:
-  - url: http://localhost:3001/
+  - url: https://moviesapi-production-e7b3.up.railway.app/
 paths:
   /user/login:
     post:
