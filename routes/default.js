@@ -126,20 +126,6 @@ router.get('/reservations', (req, res) => {
   }
 });
 
-
-// Solo genera las siguientes 8 fechas (puede ser inutil)
-router.get('/dates', (req, res) => {
-    var now = new Date();
-    const list = []
-    for (var i = 0; i < 9; i++) {
-
-        list.push(now);
-        now = now.addDays(1);
-    }
-    console.log(JSON.parse(JSON.stringify({ "dates": list })));
-    return res.status(200).json({ "dates": list })
-})
-
 //Operations
 Date.prototype.addDays = function (days) {
     var date = new Date(this.valueOf());

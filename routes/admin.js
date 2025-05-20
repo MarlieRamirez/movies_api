@@ -82,7 +82,7 @@ router.put('/cinema/:id', async (req, res) => {
       return res.status(200).json({ "message": "Se ha modificado la capacidad" });
     }
 
-    return res.json({ "message": "Hay reservaciones proximas, no se puede modificar" })
+    return res.status(403).json({ "message": "Hay reservaciones proximas, no se puede modificar" })
   }
   else {
     return res.status(401).json({ "Go back": "You're not allowed to be here" })
@@ -200,7 +200,7 @@ router.delete('/cinema/:id', (req, res) => {
 
               sql = 'DELETE FROM cinema where id = ?'
               connection.query(sql, [id]).then(([rows]) => {
-                console.log('DELETER FROM CINEMA')
+                console.log('DELETED FROM CINEMA')
               }).finally(() => {
                 return res.status(200).json({ "message": "Todos los registros fueron eliminados" })
               })
@@ -208,7 +208,7 @@ router.delete('/cinema/:id', (req, res) => {
             })
 
           } else {
-            return res.status(200).json({ "message": "No se puede eliminar la sala, tiene registros en reservación" })
+            return res.status(403).json({ "message": "No se puede eliminar la sala, tiene registros en reservación" })
           }
         })
 
