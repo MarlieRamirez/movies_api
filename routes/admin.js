@@ -21,7 +21,7 @@ router.post('/cinema', async (req, res) => {
         connection.query(sql, [req.body.name, req.body.rows, req.body.columns, req.body.movie, req.body.img, dateFormat(now, "yyyy-mm-dd"), dateFormat(now.addDays(8), "yyyy-mm-dd")]).then(async ([result]) => {
           const id = result['insertId'];
 
-          
+
           for (var i = 0; i < 9; i++) {
             newSchedule(now, id);
             now = now.addDays(1);
@@ -220,6 +220,34 @@ router.delete('/cinema/:id', (req, res) => {
   }
 });
 
+router.get('/report', (req, res) => {
+  const token = req.header("Authorization")?.split(" ")[1];
+  const decoded = validar_JWT(token, res);
+  var seats = [];
+
+  if (decoded && decoded.role == 'admin') {
+    var sql = "Select full_name, seats.column, seats.row, id_user, id_user, id_schedule, date, id_schedule from seats inner join  " + db + ".schedule ON " + db + ".schedule.id = seats.id_schedule where " + db + ".schedule.date >= ? && " + db + ".schedule.date <= ?"
+    const unformatted = new Date();
+    const today = dateFormat(unformatted, "yyyy-mm-dd");
+    const next = unformatted.addDays(8);
+    try {
+      console.log(today)
+
+      connection.query(sql, [today, next]).then(([rows]) => {
+        seats = rows
+        console.log(typeof seats)
+        
+        return res.status(200).json({"seats": rows, "quantity": rows.length, "ingresos":  rows.length * 5});
+      })
+
+    } catch (err) {
+      res.status(400)
+      return console.log(err)
+    }
+  }else{
+    return res.status(401).json({"message": "No tiene autorización de estar aquí"})
+  }
+})
 
 
 Date.prototype.addDays = function (days) {
